@@ -22,6 +22,4 @@ authRouter.post("/google/token-login", googleTokenLogin); // client side sends i
 authRouter.get("/google/login", googleLoginRedirect);     // get redirect url
 authRouter.get("/google/callback", googleCallback);       // callback handler (exchange code)
 
-// You can also add logout / refresh token routes later.
-
 export default authRouter;

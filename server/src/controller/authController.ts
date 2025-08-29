@@ -110,11 +110,16 @@ export async function googleCallback(req: Request, res: Response, next: NextFunc
     try {
         const code = req.query.code as string;
         const result = await handleGoogleCallback(code);
-        // Send token in response. In traditional redirect flow you might
-        // redirect to frontend with the token in query/hash.
-        return res.json(result);
+        
+        // Redirect to frontend with token
+        const frontendUrl = process.env.CLIENT_URL || "http://localhost:5173";
+        const redirectUrl = `${frontendUrl}/auth/callback?token=${result.token}`;
+        
+        return res.redirect(redirectUrl);
     } catch (err) {
         console.error("googleCallback error:", err);
-        next(err);
+        const frontendUrl = process.env.CLIENT_URL || "http://localhost:5173";
+        const errorUrl = `${frontendUrl}/signin?error=google_auth_failed`;
+        return res.redirect(errorUrl);
     }
 }

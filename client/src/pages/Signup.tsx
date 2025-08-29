@@ -1,40 +1,62 @@
-import React from "react";
+import { useState } from "react";
+import axiosClient from "../utils/api";
+import OtpForm from "../components/otpForm";
 import AuthLayout from "../components/AuthLayout";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 
-const Signup: React.FC = () => {
+export default function Signup() {
+  const [step, setStep] = useState<"form" | "otp">("form");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [dob, setDob] = useState("");
+
+  const handleSendOtp = async () => {
+    try {
+      await axiosClient.post("/auth/signup/email", { name, dob, email });
+      setStep("otp");
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Error sending OTP");
+    }
+  };
+
   return (
-    <AuthLayout title="Sign Up">
-      <form className="space-y-4">
-        <input
-          type="text"
-          placeholder="Full Name"
-          className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:text-gray-200"
-        />
-        <input
-          type="date"
-          placeholder="Date of Birth"
-          className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:text-gray-200"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:text-gray-200"
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Send OTP
-        </button>
-        <button
-          type="button"
-          className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition"
-        >
-          Sign up with Google
-        </button>
-      </form>
+    <AuthLayout>
+      <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
+      {step === "form" ? (
+        <>
+          <input
+            type="text"
+            placeholder="Full Name"
+            className="border p-2 w-full rounded-md mb-3"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <input
+            type="date"
+            className="border p-2 w-full rounded-md mb-3"
+            value={dob}
+            onChange={(e) => setDob(e.target.value)}
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            className="border p-2 w-full rounded-md mb-3"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <button
+            onClick={handleSendOtp}
+            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
+          >
+            Send OTP
+          </button>
+          <div className="mt-4">
+            <GoogleLoginButton />
+          </div>
+        </>
+      ) : (
+        <OtpForm email={email} mode="signup" name={name} dob={dob} />
+      )}
     </AuthLayout>
   );
-};
-
-export default Signup;
+}

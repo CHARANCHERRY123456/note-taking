@@ -16,7 +16,9 @@ if (!googleClientId || !googleClientSecret || !googleRedirectUri) {
 const oauth2Client = new OAuth2Client(googleClientId, googleClientSecret, googleRedirectUri);
 
 function makeOtp(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  const otp =  Math.floor(100000 + Math.random() * 900000).toString();
+  console.log(otp);
+  return otp;
 }
 
 export async function sendOtpService(name: string, dob: string, email: string) {
@@ -109,6 +111,8 @@ export async function googleTokenLoginService(idToken: string) {
       name: payload.name,
       email,
       authType: "google",
+      // DOB is optional for Google users
+      dob: undefined,
     } as Partial<IUser>);
   } else if (user.authType !== "google") {
     throw new Error("Email already registered via email OTP. Use email login.");
@@ -147,6 +151,8 @@ export async function handleGoogleCallback(code: string) {
       name: payload.name,
       email,
       authType: "google",
+      // DOB is optional for Google users - set to null or a default
+      dob: undefined,
     } as Partial<IUser>);
   } else if (user.authType !== "google") {
     throw new Error("Email already registered via email OTP. Use email login.");

@@ -1,35 +1,47 @@
-import React from "react";
+import { useState } from "react";
+import axiosClient from "../utils/api";
+import OtpForm from "../components/otpForm";
 import AuthLayout from "../components/AuthLayout";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 
-const Signin: React.FC = () => {
+export default function Signin() {
+  const [step, setStep] = useState<"form" | "otp">("form");
+  const [email, setEmail] = useState("");
+
+  const handleSendOtp = async () => {
+    try {
+      await axiosClient.post("/auth/login/email", { email });
+      setStep("otp");
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Error sending OTP");
+    }
+  };
+
   return (
-    <AuthLayout title="Sign In">
-      <form className="space-y-4">
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:text-gray-200"
-        />
-        <input
-          type="text"
-          placeholder="OTP"
-          className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:text-gray-200"
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Login
-        </button>
-        <button
-          type="button"
-          className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition"
-        >
-          Login with Google
-        </button>
-      </form>
+    <AuthLayout>
+      <h2 className="text-2xl font-bold mb-4">Sign In</h2>
+      {step === "form" ? (
+        <>
+          <input
+            type="email"
+            placeholder="Email"
+            className="border p-2 w-full rounded-md mb-3"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <button
+            onClick={handleSendOtp}
+            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
+          >
+            Send OTP
+          </button>
+          <div className="mt-4">
+            <GoogleLoginButton />
+          </div>
+        </>
+      ) : (
+        <OtpForm email={email} mode="signin" />
+      )}
     </AuthLayout>
   );
-};
-
-export default Signin;
+}
