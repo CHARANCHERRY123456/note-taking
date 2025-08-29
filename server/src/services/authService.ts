@@ -55,7 +55,7 @@ export async function verifyOtpService(email: string, otp: string, name?: string
   }
 
 
-  const token = generateToken({ id: user._id.toString(), email: user.email });
+  const token = generateToken({ id: user.id.toString(), email: user.email });
   await deleteOTP(email);
   return { token, user };
 }
@@ -114,7 +114,7 @@ export async function googleTokenLoginService(idToken: string) {
     throw new Error("Email already registered via email OTP. Use email login.");
   }
 
-  const token = generateToken({ id: user._id.toString(), email: user.email });
+  const token = generateToken({ id: user.id.toString(), email: user.email });
   return { token, user };
 }
 
@@ -152,6 +152,6 @@ export async function handleGoogleCallback(code: string) {
     throw new Error("Email already registered via email OTP. Use email login.");
   }
 
-  const token = generateToken({ id: user._id.toString(), email: user.email });
+  const token = generateToken({ id: user.id.toString(), email: user.email });
   return { token, user, tokens };
 }

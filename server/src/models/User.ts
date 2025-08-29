@@ -4,7 +4,7 @@ export type AuthType = "email" | "google";
 
 export interface IUser extends Document {
   name: string;
-  dob: Date;
+  dob?: Date;
   email: string;
   authType: AuthType;
   createdAt: Date;
@@ -14,7 +14,7 @@ export interface IUser extends Document {
 const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
-    dob: { type: Date, required: true },
+    dob: { type: Date, required: false },
     email: { type: String, required: true, unique: true },
     authType: { type: String, enum: ["email", "google"], required: true },
   },
