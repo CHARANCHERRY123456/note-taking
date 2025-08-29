@@ -8,6 +8,32 @@ import {
     getGoogleAuthUrl,
     handleGoogleCallback,
 } from "../services/authService";
+import { User } from "../models/User";
+
+/**
+ * GET /api/auth/me
+ * Get current user information
+ */
+export async function getCurrentUser(req: Request, res: Response, next: NextFunction) {
+    try {
+        const userId = (req as any).userId; // Set by auth middleware
+        const user = await User.findById(userId).select('-__v');
+        
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        return res.json({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            authType: user.authType
+        });
+    } catch (err) {
+        console.error("getCurrentUser error:", err);
+        next(err);
+    }
+}
 
 /**
  * POST /api/auth/signup/email

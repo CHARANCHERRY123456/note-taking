@@ -7,7 +7,9 @@ import {
   googleTokenLogin,
   googleLoginRedirect,
   googleCallback,
+  getCurrentUser,
 } from "../controller/authController";
+import { authenticateToken } from "../middleware/auth";
 
 const authRouter = Router();
 
@@ -21,5 +23,8 @@ authRouter.post("/login/email", loginWithEmail);     // request login OTP
 authRouter.post("/google/token-login", googleTokenLogin); // client side sends idToken + dob (if first time)
 authRouter.get("/google/login", googleLoginRedirect);     // get redirect url
 authRouter.get("/google/callback", googleCallback);       // callback handler (exchange code)
+
+// User info
+authRouter.get("/me", authenticateToken, getCurrentUser); // get current user info
 
 export default authRouter;

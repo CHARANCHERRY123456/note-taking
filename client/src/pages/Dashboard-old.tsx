@@ -122,7 +122,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <LoadingSpinner size="large" />
           <p className="mt-4 text-gray-600">Loading your notes...</p>
@@ -132,160 +132,137 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
-      <div className="bg-white border-b">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Logo/Brand */}
-            <div className="flex items-center">
-              <div className="w-6 h-6 bg-blue-500 rounded-md flex items-center justify-center mr-2">
-                <span className="text-white font-bold text-xs">HD</span>
-              </div>
-              <span className="text-gray-800 font-semibold">Dashboard</span>
-            </div>
-            
-            {/* User Actions */}
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <h1 className="text-2xl font-bold text-gray-900">My Notes</h1>
             <button
               onClick={handleLogout}
-              className="text-blue-500 text-sm font-medium"
+              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
             >
-              Sign Out
+              Logout
             </button>
           </div>
         </div>
       </div>
-
-      {/* Welcome Section */}
-      <div className="bg-white px-4 py-6 border-b">
-        <h1 className="text-xl font-bold text-gray-900 mb-1">
-          Welcome, {user?.name || 'Jonas Khairwald'} !
-        </h1>
-        <p className="text-gray-500 text-sm">
-          Email: {user?.email || 'jonas.khairwald@gmail.com'}
-        </p>
-        
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Create Note Button */}
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="w-full mt-4 bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors"
-        >
-          Create Note
-        </button>
-      </div>
+        <div className="mb-6">
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            {showCreateForm ? "Cancel" : "Create New Note"}
+          </button>
+        </div>
 
-      {/* Notes Section */}
-      <div className="px-4 py-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Notes</h2>
-        
-        {notes.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No notes yet. Create your first note!</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {notes.map((note) => (
-              <div
-                key={note._id}
-                className="bg-white rounded-lg p-4 shadow-sm border border-gray-200"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-gray-900 truncate flex-1">
-                    {note.title}
-                  </h3>
-                  <button
-                    onClick={() => handleDeleteNote(note._id, note.title)}
-                    className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-                <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-                  {note.content}
-                </p>
-                <p className="text-xs text-gray-400">
-                  {formatDate(note.createdAt)}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Create Note Modal */}
-      {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Create New Note</h3>
-              <button
-                onClick={() => {
-                  setShowCreateForm(false);
-                  setNewNote({ title: "", content: "" });
-                  setErrors({});
-                }}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
+        {/* Create Note Form */}
+        {showCreateForm && (
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 className="text-lg font-semibold mb-4">Create New Note</h3>
             <div className="space-y-4">
               <div>
                 <input
                   type="text"
-                  placeholder="Note title"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Note title..."
                   value={newNote.title}
                   onChange={(e) => {
                     setNewNote({ ...newNote, title: e.target.value });
                     if (errors.title) setErrors(prev => ({ ...prev, title: "" }));
                   }}
+                  className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.title ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
                 {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
               </div>
 
               <div>
                 <textarea
-                  placeholder="Write your note content here..."
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-32 ${errors.content ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Note content..."
                   value={newNote.content}
                   onChange={(e) => {
                     setNewNote({ ...newNote, content: e.target.value });
                     if (errors.content) setErrors(prev => ({ ...prev, content: "" }));
                   }}
+                  rows={4}
+                  className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.content ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
                 {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content}</p>}
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCreateNote}
+                  disabled={creating}
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 disabled:opacity-50 flex items-center gap-2 transition-colors"
+                >
+                  {creating && <LoadingSpinner size="small" color="white" />}
+                  {creating ? "Saving..." : "Save Note"}
+                </button>
                 <button
                   onClick={() => {
                     setShowCreateForm(false);
                     setNewNote({ title: "", content: "" });
                     setErrors({});
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
                 >
                   Cancel
-                </button>
-                <button
-                  onClick={handleCreateNote}
-                  disabled={creating}
-                  className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
-                >
-                  {creating && <LoadingSpinner size="small" color="white" />}
-                  {creating ? "Creating..." : "Create"}
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Notes List */}
+        {notes.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-gray-400 text-6xl mb-4">📝</div>
+            <h3 className="text-lg font-semibold text-gray-600 mb-2">No notes yet</h3>
+            <p className="text-gray-500 mb-4">Create your first note to get started!</p>
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="text-blue-500 hover:text-blue-600 font-medium"
+            >
+              Create your first note
+            </button>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {notes.map((note) => (
+              <div key={note._id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 truncate pr-2">
+                    {note.title}
+                  </h3>
+                  <button
+                    onClick={() => handleDeleteNote(note._id, note.title)}
+                    className="text-red-500 hover:text-red-700 text-xl transition-colors"
+                    title="Delete note"
+                  >
+                    🗑️
+                  </button>
+                </div>
+                <p className="text-gray-600 mb-3 line-clamp-3">
+                  {note.content}
+                </p>
+                <div className="text-sm text-gray-400">
+                  Created: {formatDate(note.createdAt)}
+                  {note.updatedAt !== note.createdAt && (
+                    <div>Updated: {formatDate(note.updatedAt)}</div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

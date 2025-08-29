@@ -2,42 +2,123 @@ import { useState } from "react";
 import axiosClient from "../utils/api";
 import OtpForm from "../components/otpForm";
 import AuthLayout from "../components/AuthLayout";
-import GoogleLoginButton from "../components/GoogleLoginButton";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useToast } from "../context/ToastContext";
+import { validateEmail } from "../utils/validation";
 
 export default function Signin() {
   const [step, setStep] = useState<"form" | "otp">("form");
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [rememberMe, setRememberMe] = useState(false);
+  const { showToast } = useToast();
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    const emailError = validateEmail(email);
+    if (emailError) newErrors[emailError.field] = emailError.message;
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSendOtp = async () => {
+    if (!validateForm()) {
+      showToast("Please enter a valid email", "error");
+      return;
+    }
+
+    setLoading(true);
     try {
       await axiosClient.post("/auth/login/email", { email });
       setStep("otp");
+      showToast("OTP sent to your email!", "success");
     } catch (err: any) {
-      alert(err.response?.data?.error || "Error sending OTP");
+      const errorMessage = err.response?.data?.error || "Error sending OTP";
+      showToast(errorMessage, "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <AuthLayout>
-      <h2 className="text-2xl font-bold mb-4">Sign In</h2>
+      {/* HD Logo/Brand */}
+      <div className="flex items-center justify-center mb-8">
+        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-2">
+          <span className="text-white font-bold text-sm">HD</span>
+        </div>
+        <span className="text-gray-600 text-sm font-medium">Note Taker</span>
+      </div>
+
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign in</h2>
+      <p className="text-gray-500 text-sm mb-8">Please login to your account</p>
+      
       {step === "form" ? (
         <>
-          <input
-            type="email"
-            placeholder="Email"
-            className="border p-2 w-full rounded-md mb-3"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <button
-            onClick={handleSendOtp}
-            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
-          >
-            Send OTP
-          </button>
-          <div className="mt-4">
-            <GoogleLoginButton />
+          <div className="space-y-6">
+            <div>
+              <input
+                type="email"
+                placeholder="jonas.khairwald@gmail.com"
+                className={`w-full px-4 py-3 border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-200'}`}
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors(prev => ({ ...prev, email: "" }));
+                }}
+              />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            </div>
+
+            <div>
+              <input
+                type="password"
+                placeholder="OTP"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  Keep me logged in
+                </label>
+              </div>
+              <div className="text-sm">
+                <a href="#" className="text-blue-500 hover:text-blue-600 font-medium">
+                  Request OTP
+                </a>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSendOtp}
+              disabled={loading}
+              className="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+            >
+              {loading && <LoadingSpinner size="small" color="white" />}
+              {loading ? "Sending..." : "Sign in"}
+            </button>
           </div>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Need an account?{" "}
+            <a href="/signup" className="text-blue-500 hover:text-blue-600 font-medium">
+              Create one
+            </a>
+          </p>
         </>
       ) : (
         <OtpForm email={email} mode="signin" />
