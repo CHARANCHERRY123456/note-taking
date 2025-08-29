@@ -1,21 +1,31 @@
-import { createClient } from 'redis';
+import { createClient } from "redis";
 
+const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
-const client = createClient({
-  url: process.env.REDIS_URL
+export const redisClient = createClient({ url: redisUrl });
+
+redisClient.on("error", (err) => {
+  console.error("Redis Client Error", err);
 });
 
-client.on('error', (err) => console.log('Redis Client Error', err));
-client.connect();
+export async function connectRedis() {
+  if (!redisClient.isOpen) await redisClient.connect();
+}
 
-export const storeOTP = async (email: string, otp: string) => {
-  await client.setEx(`otp:${email}`, 300, otp);
-};
+export async function storeOTP(email: string, otp: string, ttlSeconds = 300) {
+  await connectRedis();
+  const key = `otp:${email.toLowerCase()}`;
+  await redisClient.set(key, otp, { EX: ttlSeconds });
+}
 
-export const getOTP = async (email: string) => {
-  return await client.get(`otp:${email}`);
-};
+export async function getOTP(email: string) {
+  await connectRedis();
+  const key = `otp:${email.toLowerCase()}`;
+  return await redisClient.get(key);
+}
 
-export const deleteOTP = async (email: string) => {
-  await client.del(`otp:${email}`);
-};
+export async function deleteOTP(email: string) {
+  await connectRedis();
+  const key = `otp:${email.toLowerCase()}`;
+  await redisClient.del(key);
+}
