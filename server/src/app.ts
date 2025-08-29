@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import morgan from "morgan";
 import connectDB from "./db/mongodb";
 import authRouter from "./routes/authRoutes";
 import noteRouter from "./routes/noteRoutes";
@@ -9,6 +10,10 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// Morgan logging middleware
+app.use(morgan('combined'));
+
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
   credentials: true,
