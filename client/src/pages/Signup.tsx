@@ -2,6 +2,7 @@ import { useState } from "react";
 import axiosClient from "../utils/api";
 import OtpForm from "../components/otpForm";
 import AuthLayout from "../components/AuthLayout";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useToast } from "../context/ToastContext";
 import { validateEmail, validateName, validateDateOfBirth } from "../utils/validation";
@@ -116,6 +117,21 @@ export default function Signup() {
               {loading && <LoadingSpinner size="small" color="white" />}
               {loading ? "Sending..." : "Get OTP"}
             </button>
+          </div>
+
+          {/* Google Login Section */}
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or</span>
+              </div>
+            </div>
+            <div className="mt-4">
+              <GoogleLoginButton />
+            </div>
           </div>
 
           <p className="mt-6 text-center text-sm text-gray-500">
