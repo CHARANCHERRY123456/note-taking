@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import axiosClient from "../utils/api";
 import OtpForm from "../components/otpForm";
 import AuthLayout from "../components/AuthLayout";
@@ -14,6 +15,18 @@ export default function Signin() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [rememberMe, setRememberMe] = useState(false);
   const { showToast } = useToast();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const error = params.get("error");
+    if (error === "account_not_found" || error === "google_auth_failed") {
+      showToast(
+        "Account not found. Please create an account before logging in.",
+        "error"
+      );
+    }
+  }, [location.search, showToast]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
