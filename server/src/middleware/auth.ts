@@ -6,6 +6,7 @@ export interface AuthRequest extends Request {
     id: string;
     email: string;
   };
+  userId?: string;
 }
 
 export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
@@ -19,6 +20,7 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
   try {
     const decoded = verifyToken(token);
     req.user = decoded;
+    req.userId = decoded.id; // Add this for backward compatibility
     next();
   } catch (error) {
     return res.status(403).json({ error: 'Invalid or expired token' });

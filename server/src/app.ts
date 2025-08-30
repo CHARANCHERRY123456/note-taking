@@ -12,7 +12,7 @@ connectDB();
 const app = express();
 
 // Morgan logging middleware
-app.use(morgan('combined'));
+app.use(morgan('dev'));
 
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -24,6 +24,15 @@ app.use(express.json());
 
 app.use("/api/auth", authRouter);
 app.use("/api/notes", noteRouter);
+
+// Error handling middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Error details:', err);
+  res.status(500).json({ 
+    error: err.message || 'Internal server error',
+    details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 

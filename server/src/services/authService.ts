@@ -22,7 +22,7 @@ function makeOtp(): string {
 }
 
 export async function sendOtpService(name: string, dob: string, email: string) {
-  if (!email || !name || !dob) throw new Error("name, dob and email are required");
+  if (!email || !name || !dob) throw new Error("Name, date of birth, and email are required");
 
   const otp = makeOtp();
   await storeOTP(email, otp, OTP_TTL_SECONDS);
@@ -31,21 +31,21 @@ export async function sendOtpService(name: string, dob: string, email: string) {
     await sendOtpEmail(email, otp);
   } catch (err) {
     console.error("Failed to send OTP email:", err);
-    throw new Error("Failed to send OTP email. Check email configuration.");
+    throw new Error("Unable to send OTP email. Please check your email address or try again later.");
   }
-  return { message: "OTP sent to email", email };
+  return { message: "OTP sent to your email successfully", email };
 }
 
 export async function verifyOtpService(email: string, otp: string, name?: string, dob?: string) {
-  if (!email || !otp) throw new Error("email and otp required");
+  if (!email || !otp) throw new Error("Email and OTP are required");
 
   const stored = await getOTP(email);
-  if (!stored) throw new Error("OTP expired or not found");
-  if (stored !== otp) throw new Error("Invalid OTP");
+  if (!stored) throw new Error("OTP has expired or is invalid. Please request a new OTP.");
+  if (stored !== otp) throw new Error("Incorrect OTP. Please check and try again.");
 
   let user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
-    if (!name || !dob) throw new Error("name and dob are required to create new user");
+    if (!name || !dob) throw new Error("Name and date of birth are required to create your account");
     user = await User.create({
       name,
       dob: new Date(dob),
@@ -63,7 +63,7 @@ export async function verifyOtpService(email: string, otp: string, name?: string
 }
 
 export async function resendOtpService(email: string) {
-  if (!email) throw new Error("email required");
+  if (!email) throw new Error("Email is required");
   const otp = makeOtp();
   await storeOTP(email, otp, OTP_TTL_SECONDS);
 
@@ -71,37 +71,49 @@ export async function resendOtpService(email: string) {
     await sendOtpEmail(email, otp);
   } catch (err) {
     console.error("Failed to resend OTP:", err);
-    throw new Error("Failed to send OTP email. Check email configuration.");
+    throw new Error("Unable to send OTP email. Please check your email address or try again later.");
   }
 
-  return { message: "OTP resent to email" };
+  return { message: "OTP sent to your email successfully" };
 }
 
 export async function loginEmailService(email: string) {
-  if (!email) throw new Error("email required");
+  console.log("loginEmailService called with email:", email);
+  
+  if (!email) throw new Error("Email is required");
+  
+  console.log("Looking for user with email:", email.toLowerCase());
   const user = await User.findOne({ email: email.toLowerCase() });
-  if (!user) throw new Error("No account found with this email");
-  if (user.authType !== "email") throw new Error("Please login using Google");
+  console.log("User found:", user ? "Yes" : "No");
+  
+  if (!user) throw new Error("Account not found. Please sign up first to create an account.");
+  if (user.authType !== "email") throw new Error("This account was created with Google. Please use 'Continue with Google' to sign in.");
 
+  console.log("Generating OTP...");
   const otp = makeOtp();
+  
+  console.log("Storing OTP in Redis...");
   await storeOTP(email, otp, OTP_TTL_SECONDS);
+  
+  console.log("Sending OTP email...");
   try {
     await sendOtpEmail(email, otp);
+    console.log("OTP email sent successfully");
   } catch (err) {
     console.error("Failed to send OTP for login:", err);
-    throw new Error("Failed to send OTP email. Check email configuration.");
+    throw new Error("Unable to send OTP email. Please check your email address or try again later.");
   }
-  return { message: "OTP sent to email for login" };
+  return { message: "OTP sent to your email successfully" };
 }
 
 export async function googleTokenLoginService(idToken: string) {
-  if (!idToken) throw new Error("idToken required");
+  if (!idToken) throw new Error("Google ID token is required");
 
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   const ticket = await client.verifyIdToken({ idToken, audience: process.env.GOOGLE_CLIENT_ID });
   const payload = ticket.getPayload();
-  if(!payload) throw new Error("Invalid Google token payload");
-  if (!payload.email || !payload.name) throw new Error("Google token payload incomplete");
+  if(!payload) throw new Error("Invalid Google authentication token");
+  if (!payload.email || !payload.name) throw new Error("Unable to get your Google account information. Please try again.");
 
   const email = payload.email.toLowerCase();
   let user = await User.findOne({ email });
@@ -115,7 +127,7 @@ export async function googleTokenLoginService(idToken: string) {
       dob: undefined,
     } as Partial<IUser>);
   } else if (user.authType !== "google") {
-    throw new Error("Email already registered via email OTP. Use email login.");
+    throw new Error("This email is already registered with email/OTP. Please sign in using email instead.");
   }
 
   const token = generateToken({ id: user.id.toString(), email: user.email });
