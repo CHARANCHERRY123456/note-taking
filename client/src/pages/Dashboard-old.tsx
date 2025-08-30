@@ -37,6 +37,7 @@ export default function Dashboard() {
 
   const fetchUserData = async () => {
     try {
+      console.log(user);
       const response = await axiosClient.get("/auth/me");
       setUser(response.data);
     } catch (error: any) {
