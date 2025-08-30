@@ -51,7 +51,7 @@ export default function Signin() {
         <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-2">
           <span className="text-white font-bold text-sm">HD</span>
         </div>
-        <span className="text-gray-600 text-sm font-medium">Note Taker</span>
+        <span className="text-gray-600 text-sm font-medium">Note Taker(wait 40secs for render) </span>
       </div>
 
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign in</h2>
