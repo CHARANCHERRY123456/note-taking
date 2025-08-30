@@ -30,7 +30,6 @@ export async function getCurrentUser(req: Request, res: Response, next: NextFunc
             authType: user.authType
         });
     } catch (err) {
-        console.error("getCurrentUser error:", err);
         next(err);
     }
 }
@@ -45,7 +44,6 @@ export async function signupWithEmail(req: Request, res: Response, next: NextFun
         const result = await sendOtpService(name, dob, email);
         return res.json(result);
     } catch (err) {
-        console.error("signupWithEmail error:", err);
         next(err);
     }
 }
@@ -61,7 +59,6 @@ export async function verifyOTP(req: Request, res: Response, next: NextFunction)
         const result = await verifyOtpService(email, otp, name, dob);
         return res.json(result);
     } catch (err) {
-        console.error("verifyOTP error:", err);
         next(err);
     }
 }
@@ -76,7 +73,6 @@ export async function resendOTP(req: Request, res: Response, next: NextFunction)
         const result = await resendOtpService(email);
         return res.json(result);
     } catch (err) {
-        console.error("resendOTP error:", err);
         next(err);
     }
 }
@@ -91,7 +87,6 @@ export async function loginWithEmail(req: Request, res: Response, next: NextFunc
         const result = await loginEmailService(email);
         return res.json(result);
     } catch (err) {
-        console.error("loginWithEmail error:", err);
         next(err);
     }
 }

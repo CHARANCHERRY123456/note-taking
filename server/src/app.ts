@@ -4,6 +4,7 @@ import morgan from "morgan";
 import connectDB from "./db/mongodb";
 import authRouter from "./routes/authRoutes";
 import noteRouter from "./routes/noteRoutes";
+import { AppError } from "./utils/errors";
 import dotenv from "dotenv";
 // import "dotenv/config"
 dotenv.config();
@@ -25,12 +26,20 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/notes", noteRouter);
 
-// Error handling middleware
+// Global error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error details:', err);
-  res.status(500).json({ 
-    error: err.message || 'Internal server error',
-    details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  // If it's our custom AppError, send the message to client
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({ 
+      error: err.message 
+    });
+  }
+
+  // For unexpected errors, log them but don't expose details to client
+  console.error('Unexpected error:', err);
+  
+  return res.status(500).json({ 
+    error: 'Something went wrong. Please try again later.' 
   });
 });
 
