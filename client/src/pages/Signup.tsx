@@ -7,6 +7,9 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { useToast } from "../context/ToastContext";
 import { validateEmail, validateName, validateDateOfBirth } from "../utils/validation";
 
+import { useEffect } from "react";
+// ...existing code...
+
 export default function Signup() {
   const [step, setStep] = useState<"form" | "otp">("form");
   const [email, setEmail] = useState("");
@@ -15,6 +18,10 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { showToast } = useToast();
+
+  useEffect(() => {
+    showToast("Please wait 40 seconds for the server to start rendering.", "info");
+  }, []);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
